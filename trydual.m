@@ -24,7 +24,13 @@ clc;
 testA = dualAslack
 testA = tableau(1:end-1, 1:end-1)
 %[tableau,x,basic,feasible,optimal]=checkbasic1(dualAslack,dualb,dualc,basicvars)
-testb = -tableau(1:end-1, end)
+testb = tableau(1:end-1, end)
 testc = -tableau(end, 1:end-1)'
 %basicvars = [3 4]
 [Aback,bback,cback] = dualproblem(testA,testb,testc, basicvars)
+
+[m, n] = size(Aback);
+
+newBasicvars = setdiff((1:n), basicvars);
+
+[tableau,x,basic,feasible,optimal]=checkbasic1(Aback,bback,cback,newBasicvars)

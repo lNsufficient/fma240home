@@ -77,6 +77,25 @@ size(dualb);
 size(dualc);
 [tableau,basicvars,steps]=simp(dualAslack,dualb,dualc,basicvars);
 [tableau,xb,basic,feasible,optimal]=checkbasic1(dualAslack,dualb,dualc,basicvars);
+
+
+testA = tableau(1:end-1, 1:end-1)
+testb = tableau(1:end-1, end)
+testc = -tableau(end, 1:end-1)'
+
+[Aback,bback,cback] = dualproblem(testA,testb,testc, basicvars)
+
+[m, n] = size(Aback);
+
+newBasicvars = setdiff((1:n), basicvars);
+
+[tableau,x,basic,feasible,optimal]=checkbasic1(Aback,bback,cback,newBasicvars)
+
+x = x(newBasicvars)
+
+
+
+
 csIndex = find(xb > 0.1);
 csAstandard = Astandard(csIndex, :);
 csbstandard = bstandard(csIndex);
@@ -102,6 +121,7 @@ bstandardtest = find((Astandard*xtest <= bstandard)==0)
 btest = find((A*xtest <= b)==0)
 
 %borde ge samma lösning om jag använder compl slackness på denna...
+%OBS detta va inte bra...
 isone = find(xtest == 1)
 dualAcs = dualA(isone,:);
 dualbcs = -dualb(isone);
@@ -110,22 +130,23 @@ dualCstest = find((dualAcs*y <= dualbcs) == 0)
 dualtest = find((dualA*y <= dualb) == 0)
 dualSlacktest =  find((dualAslack*[y; zeros(64,1)] <= dualb) == 0)
 basicvars = find(y)
+
+
 %[tableau,xb,basic,feasible,optimal]=checkbasic1(dualAslack,dualb,dualc,(1:64));
-%%
-dualbasicvars = basicvars;
-
-[startA,startb,startc] = dualproblem(dualAslack,dualb,dualc,slackvars);
-[mstart,nstart] = size(startA);
-
-basicvars = 1:mstart;
-basicvars = setdiff(basicvars, dualbasicvars);
-
-[tableau,xb,basic,feasible,optimal]=checkbasic1(startA,startb,startc,basicvars);
-
-disp('WIN')
-
-%ac1 = [1 0 0 0 Oa Oa Oa]
-%ac2 = [ac1 ac1 ac1 1]
-
-
-%A3 = [ac2 0 0 0 Oa Oa Oa]
+% dualbasicvars = basicvars;
+% 
+% [startA,startb,startc] = dualproblem(dualAslack,dualb,dualc,slackvars);
+% [mstart,nstart] = size(startA);
+% 
+% basicvars = 1:mstart;
+% basicvars = setdiff(basicvars, dualbasicvars);
+% 
+% [tableau,xb,basic,feasible,optimal]=checkbasic1(startA,startb,startc,basicvars);
+% 
+% disp('WIN')
+% 
+% %ac1 = [1 0 0 0 Oa Oa Oa]
+% %ac2 = [ac1 ac1 ac1 1]
+% 
+% 
+% %A3 = [ac2 0 0 0 Oa Oa Oa]
