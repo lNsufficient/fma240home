@@ -50,7 +50,9 @@ end
 %z = keptPop*c;
 %z'
 fitness = getFitness(keptPop, c);
-parentIndicies = selectParents(fitness, round(N/2), fitnessProb);
+parentIndicies = selectParents(fitness, nbrParents, fitnessProb);
 parentPop = keptPop(parentIndicies,:);
 childrenPop = crossover(parentPop, crossoverPoint, 0.7);
+mutatedPop = mutate(childrenPop,0.1);
+[mutatedPop ones(nbrParents, 1)*8 childrenPop]
 
