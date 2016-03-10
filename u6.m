@@ -40,5 +40,12 @@ end
 if (nbrChrom > N*1.2)
     keptPop = keptPop(1:round(N*1.2), :);
 end
-size(keptPop)
-checkPopulation(keptPop, a, k)'
+%size(keptPop)
+%checkPopulation(keptPop, a, k)'
+%z = keptPop*c;
+%z'
+fitness = getFitness(keptPop, c);
+
+
+parentIndicies = selectParents(fitness, round(N/2), 0.7)
+
