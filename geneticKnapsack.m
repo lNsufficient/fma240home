@@ -1,7 +1,6 @@
-clear;
-c = [10 5 2]';
-a = [2 2 1]';
-k = 3;
+function [optval optimal_chromosones Nfactor] = geneticKnapsack(c, a, k, maxRounds)
+%GENETICKNAPSACK Summary of this function goes here
+%   Detailed explanation goes here
 
 if (length(a) ~= length(c)) 
     error('invalid a, c')
@@ -27,7 +26,7 @@ nbrParents = round(N/4)*2; %To make sure it is an even number.
 
 meanSum = sum(a)/2;
 Nfactor = min(meanSum/k, 1)*Ncorr;
-maxRounds = 10;
+
 
 % population = randi(2, round(Ntry), chromLength) - 1;
 % validVector = checkPopulation(population, a, k);
@@ -38,7 +37,7 @@ noImprovement = 0;
 optimal_chromosones = [];
 
 while (noImprovement < maxRounds)
-    keptPop = fillPop(population, Nfactor, Nmax, Nmin, a, k);
+    [keptPop Nfactor] = fillPop(population, Nfactor, Nmax, Nmin, a, k);
     optval = [optval max(keptPop*c)];
     if (optval(end) == max(optval))
         noImprovement = noImprovement + 1;
@@ -60,4 +59,6 @@ while (noImprovement < maxRounds)
     population = population(validChrom, :);
 end
 optval = max(optval);
-optimal_chromosones
+
+end
+
