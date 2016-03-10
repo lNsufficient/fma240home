@@ -4,13 +4,16 @@ function parentIndicies = selectParents(fitness, nbrParents, fitnessprob)
 %if fitnessprob is set to 1, most fit will be chosen. If it is set to zero
 %randomness will have greater impact.
 
-nbrChroms = length(fitness);
+[nbrChroms, ~] = size(fitness); %Length might not be sufficient
 
 %Se till att alla har viss chans - även en nolla kan vara bra om exempelvis
 %endast en pryl är värd att ta med - mutation kan leda till att den tas
 %med.
+zeroCoeff = min(fitness(find(fitness > 0))); %At best it will be as good as worst.
+%worst can be randomed to be less than this though...
 zeroIndicies = find(fitness == 0);
-fitness(zeroIndicies) = 0.1*rand(length(zeroIndicies), 1);
+[nbrZeros, ~] = size(zeroIndicies);
+fitness(zeroIndicies) = zeroCoeff*rand(nbrZeros, 1);
 %fitness = fitness + 0.1*rand(nbrChroms, 1); %this is probably more fair
 
 

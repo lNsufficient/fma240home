@@ -16,11 +16,16 @@ if (min(c) <= 0)
     disp('not knapsack problem?')
 end
 
-%Generate population:
 N = 30;
+Ncorr = 2;
+fitnessProb = 0.1;
+crossoverPoint = round(length(a)/2);
+nbrParents = round(N/4)*2; %To make sure it is an even number.
+%Generate population:
+
 meanSum = sum(a)/2;
 nfactor = min(meanSum/k, 1);
-Ncorr = 2;
+
 Ntry = nfactor*N*Ncorr;
 chromLength = length(a);
 population = randi(2, round(Ntry), chromLength) - 1;
@@ -45,7 +50,7 @@ end
 %z = keptPop*c;
 %z'
 fitness = getFitness(keptPop, c);
-
-
-parentIndicies = selectParents(fitness, round(N/2), 0.7)
+parentIndicies = selectParents(fitness, round(N/2), fitnessProb);
+parentPop = keptPop(parentIndicies,:);
+childrenPop = crossover(parentPop, crossoverPoint, 0.7);
 
