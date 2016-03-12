@@ -5,7 +5,8 @@ slack = [1 0 0 0; 0 -1 0 0; 0 0 -1 0; 0 0 0 1; 0 0 0 0]
 disp('using negative values for greater than constraints')
 A1 = [A0 slack]
 [m1, n1] = size(A1);
-c1 = [2 1 3 4 zeros(1, n1)]'
+%c1 = [2 1 3 4 zeros(1, n1)]'
+c1 = [2 1 3 4 zeros(1, 4)]'
 disp('adding zeroes for slack variables')
 
 disp('Two phase method, auxillary problem')
@@ -76,3 +77,5 @@ A_0 = [A0 zeros(5,4)];
 startingProblemResult = A_0*x
 disp('Satisfies all constraints')
 
+optimalValue = c1'*x
+feasible
