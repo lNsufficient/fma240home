@@ -1,4 +1,4 @@
-function [optval optimal_chromosones Nfactor] = geneticKnapsack(c, a, k, maxRounds)
+function [optval optimal_chromosones Nfactor] = geneticKnapsack(c, a, k, maxRounds, Nfactor)
 %GENETICKNAPSACK Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -25,7 +25,7 @@ nbrParents = round(N/4)*2; %To make sure it is an even number.
 %Generate population:
 
 meanSum = sum(a)/2;
-Nfactor = min(meanSum/k, 1)*Ncorr;
+%Nfactor = min(meanSum/k, 1)*Ncorr;
 
 
 % population = randi(2, round(Ntry), chromLength) - 1;
@@ -35,16 +35,18 @@ population = [];
 optval = [];
 noImprovement = 0;
 optimal_chromosones = [];
+oldOpt = 0;
 
 while (noImprovement < maxRounds)
-    [keptPop Nfactor] = fillPop(population, Nfactor, Nmax, Nmin, a, k);
-    optval = [optval max(keptPop*c)];
-    if (optval(end) == max(optval))
+    [keptPop ~] = fillPop(population, Nfactor, Nmax, Nmin, a, k);
+    newOpt = max(keptPop*c);
+    if (newOpt == oldOpt)
         noImprovement = noImprovement + 1;
-        optimal_chromosones = [optimal_chromosones; keptPop(min(find(keptPop*c == max(optval))), :)];
-    elseif (optval(end) > max(optval))
-        optimal_chromosones = keptPop(min(find(keptPop*c == max(optval))), :);
+        optimal_chromosones = [optimal_chromosones; keptPop(min(find(keptPop*c == newOpt)), :)];
+    elseif (newOpt > oldOpt)
+        optimal_chromosones = keptPop(min(find(keptPop*c == newOpt)), :);
         noImprovement = 1;
+        oldOpt = newOpt;
     end
     %size(keptPop)
     %checkPopulation(keptPop, a, k)'
@@ -58,7 +60,7 @@ while (noImprovement < maxRounds)
     validChrom = checkPopulation(population, a, k);
     population = population(validChrom, :);
 end
-optval = max(optval);
+optval =oldOpt;
 
 end
 

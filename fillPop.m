@@ -13,11 +13,13 @@ while(nbrChrom < Nmin)
     [nbrNew, ~] = size(tempKept);
     population = [population; tempKept];
     nbrChrom = nbrNew + nbrChrom;
-    Nfactor = Nfactor*1.2;
+    %Nfactor = Nfactor*1.2; %Först trodde jag det kunde va lönt att göra
+    %stora populationer och slänga bort, sen visade det sig att det var
+    %inte smart, verkade ta lång tid.
 end
 if (nbrChrom > Nmax)
     population = population(1:Nmax, :);
-    Nfactor = Nfactor/1.05; %It is probably okay if this one is big.
+    %Nfactor = Nfactor/1.05; %It is probably okay if this one is big.
     %this way, children of old generations are kept
 end
 
