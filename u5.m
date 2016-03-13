@@ -48,6 +48,7 @@ A5(3, 52) = 1;
 A5(4, 62) = 1;
 
 A = [A1; A2; A3; A4; A5];
+%A = [A1; A2; A3; A4];
 b = ones(68, 1);
 c = -ones(64, 1); %Så det optimala värdet är -16
 
@@ -67,7 +68,10 @@ dualb = -cstandard; %Här är det viktigt att dualb >= 0 för alla element
 if (min(dualb)<0)
     error('dualb har element < 0')
 end
-dualc = -[bstandard; zeros(64,1)]; %Så att vi maximerar i stället för minimerar
+dualc = -bstandard;
+
+
+dualcslack = -[bstandard; zeros(64,1)]; %Så att vi maximerar i stället för minimerar
 
 
 
@@ -75,34 +79,50 @@ basicvars = slackvars;
 size(dualAslack);
 size(dualb);
 size(dualc);
-[tableau,basicvars,steps]=simp(dualAslack,dualb,dualc,basicvars);
-[tableau,xb,basic,feasible,optimal]=checkbasic1(dualAslack,dualb,dualc,basicvars);
+[tableau,basicvars,steps]=simp(dualAslack,dualb,dualcslack,basicvars);
+[tableau,xb,basic,feasible,optimal]=checkbasic1(dualAslack,dualb,dualcslack,basicvars);
 
+lb = zeros(n, 1);
+intcon = 1:n;
+x1 = intlinprog(-dualc,intcon,dualA,dualb, [], [], lb)
+x2 = intlinprog(c,1:64,Astandard,bstandard, [], [], lb) %Gives the correct solution...
 
-testA = tableau(1:end-1, 1:end-1)
-testb = tableau(1:end-1, end)
-testc = -tableau(end, 1:end-1)'
+% testA = tableau(1:end-1, 1:end-1)
+% testb = tableau(1:end-1, end)
+% testc = -tableau(end, 1:end-1)'
+% 
+% [Aback,bback,cback] = dualproblem(testA,testb,testc, basicvars)
+% 
+% [m, n] = size(Aback);
+% 
+% newBasicvars = setdiff((1:n), basicvars);
+% 
+% [tableau,x,basic,feasible,optimal]=checkbasic1(Aback,bback,cback,newBasicvars)
+% 
+% x = x(newBasicvars)
 
-[Aback,bback,cback] = dualproblem(testA,testb,testc, basicvars)
-
-[m, n] = size(Aback);
-
+%Try getting back basicVariables
+dualAtest = [-A' A' eye(64)];
 newBasicvars = setdiff((1:n), basicvars);
-
-[tableau,x,basic,feasible,optimal]=checkbasic1(Aback,bback,cback,newBasicvars)
-
-x = x(newBasicvars)
-
-
-
+Afirst = [Astandard [eye(68); -eye(68)]];
+[tableau,xb,basic,feasible,optimal]=checkbasic1(Afirst,b,c,newBasicvars);
+%Detta funkade inte, för newBasicvars innehöll basicVars av för stort
+%index. Detta får mig att tro att simplexmetoden inte fungerar som den ska.
+%
 
 csIndex = find(xb > 0.1);
+csIndex = find(x1 > 0.1);
 csAstandard = Astandard(csIndex, :);
 csbstandard = bstandard(csIndex);
-x = csAstandard\csbstandard; %Detta borde räcka, men det blir tyvärr fel.
+x = [csAstandard; A5]\[csbstandard; ones(4,1)]; %Detta borde räcka, men det blir tyvärr fel.
+%x = [csAstandard; A5;A1; A2; A3; A4]\[csbstandard; ones(36, 1)]; %Detta borde räcka, men det blir tyvärr fel.
+%x = csAstandard\csbstandard;
 xindicies = find(x>0.1)
 
 standardProblem = find(Astandard*x >= bstandard)
+
+dualAnoSlack = [dualA zeros(64,64)];
+dualSol = dualAnoSlack*xb
 
 %xb innehåller bara ettor och nollor, inga negativa. Bra!
 %Detta ger mig en lösning med exakt 16 ettor i x - bra!
@@ -112,24 +132,31 @@ standardProblem = find(Astandard*x >= bstandard)
 %Dock är det inte lösningen till sudoku och det är framför allt inte
 %lösningen till problemet, vars dual jag försökte lösa.
 
-%Testar den givna uppgiften:
-Testsol = [3 8 10 13 17 22 27 32 34 37 44 47 52 55 57 62];
-xtest = zeros(64, 1);
-xtest(Testsol) = 1;
-[tableau,xb,basic,feasible,optimal]=checkbasic1(Astandard,bstandard,cstandard,Testsol);
-bstandardtest = find((Astandard*xtest <= bstandard)==0)
-btest = find((A*xtest <= b)==0)
+%En anledning till detta kan vara att csAstandard - [16x64], när
+%operationen csAstandard\csbstandard utförs så hittas bara en av alla
+%möjliga lösningar. Jag testade med den korrekta lösningen här och
+%(självklart) ger den rätt lösning. Detta ger viss information om att
+%csAstandard inte kan vara den rätta, problemet är tydligen inte entydigt
+%bestämt. 
 
-%borde ge samma lösning om jag använder compl slackness på denna...
-%OBS detta va inte bra...
-isone = find(xtest == 1)
-dualAcs = dualA(isone,:);
-dualbcs = -dualb(isone);
-y = dualAcs\dualbcs;
-dualCstest = find((dualAcs*y <= dualbcs) == 0)
-dualtest = find((dualA*y <= dualb) == 0)
-dualSlacktest =  find((dualAslack*[y; zeros(64,1)] <= dualb) == 0)
-basicvars = find(y)
+%Testar den givna uppgiften:
+% Testsol = [3 8 10 13 17 22 27 32 34 37 44 47 52 55 57 62];
+% xtest = zeros(64, 1);
+% xtest(Testsol) = 1;
+% [tableau,xb,basic,feasible,optimal]=checkbasic1(Astandard,bstandard,cstandard,Testsol);
+% bstandardtest = find((Astandard*xtest <= bstandard)==0)
+% btest = find((A*xtest <= b)==0)
+% 
+% %borde ge samma lösning om jag använder compl slackness på denna...
+% %OBS detta va inte bra...
+% isone = find(xtest == 1)
+% dualAcs = dualA(isone,:);
+% dualbcs = -dualb(isone);
+% y = dualAcs\dualbcs;
+% dualCstest = find((dualAcs*y <= dualbcs) == 0)
+% dualtest = find((dualA*y <= dualb) == 0)
+% dualSlacktest =  find((dualAslack*[y; zeros(64,1)] <= dualb) == 0)
+% basicvars = find(y)
 
 
 %[tableau,xb,basic,feasible,optimal]=checkbasic1(dualAslack,dualb,dualc,(1:64));

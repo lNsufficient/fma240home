@@ -1,9 +1,11 @@
 clear;
 
-A = [2 1 3 1; 2 3 0 4; 3 1 2 0];
-A1 = [A eye(3)];
-b1 = [8 12 18]';
-c1 = [1 2 1 1 0 0 0]';
+A = [2 1 3 1; 2 3 0 4; 3 1 2 0]
+disp('Adding slack variables')
+A1 = [A eye(3)]
+b1 = [8 12 18]'
+c1 = [1 2 1 1 0 0 0]'
+disp('Making sure that c(slackVaribales) = 0')
 
 [m1, n1] = size(A1);
 
@@ -80,10 +82,14 @@ tableau
 
 optval = -tableau(end, end)
 
-basicvars = setdiff(1:8, dualbasicvars);
+basicvars = setdiff(1:8, dualbasicvars)
+disp('gets basicvars with help from dual problem')
 [tableau,x,basic,feasible,optimal] = checkbasic1(A3, b3, c3, basicvars);
 x3 = x
 
+disp('Optimal value for x3<= 1 was the best result, led to')
+x = x2(1:4)
+optval = c1(1:4)'*x
 
 % atest = [2 5 1 0; 8 3 0 1];
 % a2test = [atest zeros(2, 1); 1 0 0 0 1];
